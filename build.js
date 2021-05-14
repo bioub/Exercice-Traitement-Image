@@ -3,6 +3,9 @@ const path = require('path');
 const globby = require('globby');
 const _ = require('lodash');
 const sharp = require('sharp');
+const imagemin = require('imagemin');
+const imageminPngquant = require('imagemin-pngquant');
+const imageminSvgo = require('imagemin-svgo');
 
 process.chdir(__dirname);
 
@@ -55,7 +58,15 @@ async function copyImages() {
   await fs.writeJson(path.resolve(__dirname, 'report.json'), report);
 }
 
+async function reduceImagesSize() {
+  await imagemin(['dest/*.{png,svg}'], {
+    destination: 'dest',
+    plugins: [imageminPngquant(), imageminSvgo()],
+  });
+}
+
 (async function () {
   await rmAndMkdir();
   await copyImages();
+  await reduceImagesSize();
 })();
